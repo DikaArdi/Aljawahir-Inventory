@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../services/database_helper.dart';
+import '../l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 
@@ -73,7 +74,7 @@ class _ReportScreenState extends State<ReportScreen> {
     final isOwner = Provider.of<UserProvider>(context).isOwner;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Daily Report")),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.dailyReportTitle)),
       body: Column(
         children: [
           // --- 1. Date Selector ---
@@ -123,9 +124,9 @@ class _ReportScreenState extends State<ReportScreen> {
             padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
-                _buildSummaryCard("Total Sales", _totalSales, Colors.blue),
+                _buildSummaryCard(AppLocalizations.of(context)!.totalSales, _totalSales, Colors.blue),
                 const SizedBox(width: 16),
-                _buildSummaryCard("Profit", _totalProfit, Colors.green),
+                _buildSummaryCard(AppLocalizations.of(context)!.profit, _totalProfit, Colors.green),
               ],
             ),
           ),
@@ -137,7 +138,7 @@ class _ReportScreenState extends State<ReportScreen> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _transactions.isEmpty
-                    ? const Center(child: Text("No sales on this date."))
+                    ? Center(child: Text(AppLocalizations.of(context)!.noSalesDate))
                     : ListView.builder(
                         itemCount: _transactions.length,
                         itemBuilder: (context, index) {
@@ -150,9 +151,9 @@ class _ReportScreenState extends State<ReportScreen> {
                               backgroundColor: Colors.blue[100],
                               child: const Icon(Icons.receipt, color: Colors.blue),
                             ),
-                            title: Text("Sale at $time"),
+                            title: Text(AppLocalizations.of(context)!.saleAtTime(time)),
                             subtitle: Text(
-                              "Profit: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(txn['profit'])}",
+                              "${AppLocalizations.of(context)!.profit}: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(txn['profit'])}",
                               style: TextStyle(color: Colors.green[700]),
                             ),
                             trailing: Row(
@@ -183,15 +184,15 @@ class _ReportScreenState extends State<ReportScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text("Delete Transaction?"),
-        content: const Text("This will remove the sale record. If this transaction was made recently, stock will be restored."),
+        title: Text(AppLocalizations.of(context)!.deleteTransactionTitle),
+        content: Text(AppLocalizations.of(context)!.deleteTransactionConfirm),
         actions: [
           TextButton(
-            child: const Text("Cancel"),
+            child: Text(AppLocalizations.of(context)!.cancel),
             onPressed: () => Navigator.of(ctx).pop(),
           ),
           TextButton(
-            child: const Text("Delete", style: TextStyle(color: Colors.red)),
+            child: Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red)),
             onPressed: () async {
               Navigator.of(ctx).pop(); // Close dialog
               await DatabaseHelper.instance.deleteTransaction(id);
@@ -199,7 +200,7 @@ class _ReportScreenState extends State<ReportScreen> {
               
               if (mounted) {
                  ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Transaction deleted.")),
+                  SnackBar(content: Text(AppLocalizations.of(context)!.transactionDeleted)),
                 );
               }
             },

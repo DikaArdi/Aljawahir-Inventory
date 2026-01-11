@@ -7,7 +7,8 @@ import '../models/product.dart';
 import '../services/database_helper.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
-import 'scanner_screen.dart'; // Ensuring this is imported if used
+import 'scanner_screen.dart';
+import '../l10n/app_localizations.dart';
 
 class AddEditProductScreen extends StatefulWidget {
   // If this is null, we are adding a new product.
@@ -83,16 +84,16 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Delete Product?"),
-        content: Text("Are you sure you want to delete '${widget.product!.name}'?"),
+        title: Text(AppLocalizations.of(context)!.deleteProductTitle),
+        content: Text(AppLocalizations.of(context)!.deleteProductConfirm(widget.product!.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text("Cancel"),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text("Delete", style: TextStyle(color: Colors.red)),
+            child: Text(AppLocalizations.of(context)!.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -151,7 +152,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.product == null ? 'Add New Item' : 'Edit Item'),
+        title: Text(widget.product == null ? AppLocalizations.of(context)!.addNewItem : AppLocalizations.of(context)!.editItem),
         actions: [
           // 2. Hide Delete Button for Employees
           if (widget.product != null && isOwner)
@@ -188,10 +189,10 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                           )
                         : Column(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(Icons.add_a_photo, size: 40, color: Colors.grey),
-                              SizedBox(height: 5),
-                              Text("Tap to add image", style: TextStyle(color: Colors.grey)),
+                            children: [
+                              const Icon(Icons.add_a_photo, size: 40, color: Colors.grey),
+                              const SizedBox(height: 5),
+                              Text(AppLocalizations.of(context)!.tapToAddImage, style: const TextStyle(color: Colors.grey)),
                             ],
                           ),
                   ),
@@ -204,12 +205,12 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                 controller: _nameController,
                 readOnly: !isOwner, // <--- LOCK
                 decoration: InputDecoration(
-                  labelText: 'Product Name', 
+                  labelText: AppLocalizations.of(context)!.productNameLabel, 
                   border: const OutlineInputBorder(),
                   fillColor: !isOwner ? Colors.grey[200] : null, // Visual cue
                   filled: !isOwner,
                 ),
-                validator: (value) => value!.isEmpty ? 'Please enter a name' : null,
+                validator: (value) => value!.isEmpty ? AppLocalizations.of(context)!.productNameError : null,
                 textInputAction: TextInputAction.next,
               ),
               const SizedBox(height: 16),
@@ -224,7 +225,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                       // I will lock it for consistency with Name.
                       readOnly: !isOwner,
                       decoration: InputDecoration(
-                        labelText: 'Barcode (Optional)', 
+                        labelText: AppLocalizations.of(context)!.barcodeLabel, 
                         border: const OutlineInputBorder(),
                         fillColor: !isOwner ? Colors.grey[200] : null,
                         filled: !isOwner,
@@ -253,7 +254,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                           _barcodeController.text = scannedCode;
                         });
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Scanned: $scannedCode")),
+                          SnackBar(content: Text(AppLocalizations.of(context)!.scannedCodeMessage(scannedCode))),
                         );
                       }
                     },
@@ -271,13 +272,13 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                       readOnly: !isOwner, // <--- LOCK
                       obscureText: !isOwner, // Hide Cost Price from Employee? (Optional - User suggested)
                       decoration: InputDecoration(
-                        labelText: 'Buy Price (Cost)', 
+                        labelText: AppLocalizations.of(context)!.costPriceLabel, 
                         prefixText: 'Rp ',
                         fillColor: !isOwner ? Colors.grey[200] : null,
                         filled: !isOwner,
                       ),
                       keyboardType: TextInputType.number,
-                      validator: (value) => value!.isEmpty ? 'Required' : null,
+                      validator: (value) => value!.isEmpty ? AppLocalizations.of(context)!.requiredError : null,
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -286,13 +287,13 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                       controller: _sellController,
                       readOnly: !isOwner, // <--- LOCK
                       decoration: InputDecoration(
-                        labelText: 'Sell Price', 
+                        labelText: AppLocalizations.of(context)!.sellPriceLabel, 
                         prefixText: 'Rp ',
                         fillColor: !isOwner ? Colors.grey[200] : null,
                         filled: !isOwner,
                       ),
                       keyboardType: TextInputType.number,
-                      validator: (value) => value!.isEmpty ? 'Required' : null,
+                      validator: (value) => value!.isEmpty ? AppLocalizations.of(context)!.requiredError : null,
                     ),
                   ),
                 ],
@@ -303,17 +304,17 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
               // This stays enabled!
               TextFormField(
                 controller: _stockController,
-                decoration: const InputDecoration(labelText: 'Current Stock', border: OutlineInputBorder()),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.currentStockLabel, border: const OutlineInputBorder()),
                 keyboardType: TextInputType.number,
-                validator: (value) => value!.isEmpty ? 'Required' : null,
+                validator: (value) => value!.isEmpty ? AppLocalizations.of(context)!.requiredError : null,
               ),
               const SizedBox(height: 16),
 
               // --- Archived / Retired Switch (Owner Only) ---
               if (isOwner)
                 SwitchListTile(
-                  title: const Text("Retired Product"),
-                  subtitle: const Text("Hide from cashier but keep history"),
+                  title: Text(AppLocalizations.of(context)!.retiredProductTitle),
+                  subtitle: Text(AppLocalizations.of(context)!.retiredProductSubtitle),
                   value: _isArchived, // State variable
                   onChanged: (val) {
                     setState(() {
@@ -331,7 +332,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                   foregroundColor: Colors.white,
                 ),
                 onPressed: _saveProduct,
-                child: const Text('SAVE PRODUCT', style: TextStyle(fontSize: 18)),
+                child: Text(AppLocalizations.of(context)!.saveProductButton, style: const TextStyle(fontSize: 18)),
               ),
             ],
           ),

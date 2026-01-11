@@ -10,6 +10,7 @@ import 'add_edit_product_screen.dart';
 import 'report_screen.dart';
 
 import 'scanner_screen.dart';
+import '../l10n/app_localizations.dart';
 
 class CashierScreen extends StatefulWidget {
   const CashierScreen({super.key});
@@ -92,7 +93,7 @@ class _CashierScreenState extends State<CashierScreen> {
     // only the widgets inside this builder re-render.
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Stationery Shop"),
+        title: Text(AppLocalizations.of(context)!.stationeryShop),
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) {
@@ -111,7 +112,7 @@ class _CashierScreenState extends State<CashierScreen> {
                     children: [
                       Icon(_showArchived ? Icons.visibility_off : Icons.visibility, color: Colors.grey),
                       const SizedBox(width: 8),
-                      Text(_showArchived ? "Hide Retired" : "Show Retired"),
+                      Text(_showArchived ? AppLocalizations.of(context)!.hideRetired : AppLocalizations.of(context)!.showRetired),
                     ],
                   ),
                 ),
@@ -162,12 +163,12 @@ class _CashierScreenState extends State<CashierScreen> {
               Provider.of<CartProvider>(context, listen: false).addToCart(product);
               // ignore: use_build_context_synchronously
               ScaffoldMessenger.of(context).showSnackBar(
-                 SnackBar(content: Text("${product.name} Added!"))
+                 SnackBar(content: Text(AppLocalizations.of(context)!.itemAddedMessage(product.name)))
               );
             } catch (e) {
               // ignore: use_build_context_synchronously
               ScaffoldMessenger.of(context).showSnackBar(
-                 const SnackBar(content: Text("Product not found!"), backgroundColor: Colors.red)
+                 SnackBar(content: Text(AppLocalizations.of(context)!.productNotFound), backgroundColor: Colors.red)
               );
             }
           }
@@ -180,10 +181,10 @@ class _CashierScreenState extends State<CashierScreen> {
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               onChanged: (value) => _runFilter(value),
-              decoration: const InputDecoration(
-                labelText: 'Search Product',
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)!.searchProduct,
+                prefixIcon: const Icon(Icons.search),
+                border: const OutlineInputBorder(),
               ),
             ),
           ),
@@ -193,7 +194,7 @@ class _CashierScreenState extends State<CashierScreen> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _filteredProducts.isEmpty
-                    ? const Center(child: Text("No products found"))
+                    ? Center(child: Text(AppLocalizations.of(context)!.noProductsFound))
                     : GridView.builder(
                         padding: const EdgeInsets.all(8),
                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -230,7 +231,7 @@ class _CashierScreenState extends State<CashierScreen> {
               ? () {
                   ScaffoldMessenger.of(context).hideCurrentSnackBar();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Cannot sell retired product.")),
+                    SnackBar(content: Text(AppLocalizations.of(context)!.cannotSellRetired)),
                   );
                 }
               : () {
@@ -242,14 +243,14 @@ class _CashierScreenState extends State<CashierScreen> {
               if (success) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text("${product.name} added!"),
+                    content: Text(AppLocalizations.of(context)!.itemAddedMessage(product.name)),
                     duration: const Duration(milliseconds: 500),
                   ),
                 );
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text("Out of Stock! Cannot add ${product.name}."),
+                    content: Text(AppLocalizations.of(context)!.outOfStockMessage(product.name)),
                     backgroundColor: Colors.red,
                     duration: const Duration(seconds: 1),
                   ),
@@ -308,7 +309,7 @@ class _CashierScreenState extends State<CashierScreen> {
                               ),
                               const SizedBox(height: 4),
                               if (product.isArchived)
-                                const Text("RETIRED", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 12))
+                                Text(AppLocalizations.of(context)!.retiredLabel, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 12))
                               else ...[
                                 Text(
                                   _formatCurrency(product.sellPrice),
@@ -316,7 +317,7 @@ class _CashierScreenState extends State<CashierScreen> {
                                 ),
                                 const SizedBox(height: 2),
                                  Text(
-                                  "Stock: ${product.stock}",
+                                  AppLocalizations.of(context)!.stockLabel(product.stock),
                                   style: TextStyle(
                                     color: product.stock < 5 ? Colors.red : Colors.grey,
                                     fontSize: 10,
@@ -390,7 +391,7 @@ class _CashierScreenState extends State<CashierScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "${cart.totalItemsCount} Items",
+                      AppLocalizations.of(context)!.itemsCount(cart.totalItemsCount),
                       style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                     Text(
@@ -416,12 +417,12 @@ class _CashierScreenState extends State<CashierScreen> {
                     _loadProducts(); // Refresh stock counts from DB
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Transaction Saved!")),
+                        SnackBar(content: Text(AppLocalizations.of(context)!.transactionSaved)),
                       );
                     }
                   }
                 },
-              child: const Text("PAY", style: TextStyle(fontSize: 18, color: Colors.white)),
+              child: Text(AppLocalizations.of(context)!.payButton, style: const TextStyle(fontSize: 18, color: Colors.white)),
             ),
           ],
         ),
@@ -441,7 +442,7 @@ class _CashierScreenState extends State<CashierScreen> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  const Text("Current Cart", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text(AppLocalizations.of(context)!.currentCart, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   const Divider(),
                   Expanded(
                     child: ListView.builder(

@@ -4,6 +4,9 @@ import 'package:share_plus/share_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:intl/intl.dart';
 import '../services/database_helper.dart';
+import '../l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import '../providers/user_provider.dart';
 
 class BackupScreen extends StatefulWidget {
   const BackupScreen({super.key});
@@ -15,6 +18,73 @@ class BackupScreen extends StatefulWidget {
 class _BackupScreenState extends State<BackupScreen> {
   bool _isProcessing = false;
 
+  void _showChangePinDialog() {
+    final oldPinController = TextEditingController();
+    final newPinController = TextEditingController();
+    final confirmPinController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(AppLocalizations.of(context)!.changePinTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: oldPinController,
+              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.oldPinLabel),
+              obscureText: true,
+              keyboardType: TextInputType.number,
+            ),
+            TextField(
+              controller: newPinController,
+              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.newPinLabel),
+              obscureText: true,
+              keyboardType: TextInputType.number,
+            ),
+            TextField(
+              controller: confirmPinController,
+              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.confirmPinLabel),
+              obscureText: true,
+              keyboardType: TextInputType.number,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            child: Text(AppLocalizations.of(context)!.cancel),
+            onPressed: () => Navigator.pop(ctx),
+          ),
+          ElevatedButton(
+            child: Text(AppLocalizations.of(context)!.changePinButton),
+            onPressed: () async {
+              if (newPinController.text != confirmPinController.text) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(AppLocalizations.of(context)!.pinMismatchError), backgroundColor: Colors.red),
+                );
+                return;
+              }
+
+              final success = await Provider.of<UserProvider>(context, listen: false)
+                  .changePin(oldPinController.text, newPinController.text);
+              
+              if (success) {
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(AppLocalizations.of(context)!.pinChangedSuccess), backgroundColor: Colors.green),
+                );
+              } else {
+                 ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(AppLocalizations.of(context)!.wrongOldPinError), backgroundColor: Colors.red),
+                );
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   // --- EXPORT LOGIC ---
   Future<void> _createBackup() async {
     setState(() => _isProcessing = true);
@@ -23,7 +93,7 @@ class _BackupScreenState extends State<BackupScreen> {
       final File dbFile = File(dbPath);
 
       if (!await dbFile.exists()) {
-        if (mounted) _showSnack("No database found to backup!", Colors.red);
+        if (mounted) _showSnack(AppLocalizations.of(context)!.noDatabaseFound, Colors.red);
         return;
       }
 
@@ -38,7 +108,7 @@ class _BackupScreenState extends State<BackupScreen> {
       );
 
     } catch (e) {
-      if (mounted) _showSnack("Backup failed: $e", Colors.red);
+      if (mounted) _showSnack(AppLocalizations.of(context)!.backupFailed(e.toString()), Colors.red);
     } finally {
       if (mounted) setState(() => _isProcessing = false);
     }
@@ -56,18 +126,18 @@ class _BackupScreenState extends State<BackupScreen> {
     bool? confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text("⚠️ Overwrite Data?"),
-        content: const Text(
-          "This will DELETE your current inventory and replace it with the backup file.\n\nAre you sure?",
+        title: Text(AppLocalizations.of(context)!.overwriteConfirmTitle),
+        content: Text(
+          AppLocalizations.of(context)!.overwriteConfirmMessage,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text("Cancel"),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text("RESTORE", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+            child: Text(AppLocalizations.of(context)!.restoreButton, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -86,12 +156,12 @@ class _BackupScreenState extends State<BackupScreen> {
 
       // 5. Success!
       if (mounted) {
-        _showSnack("Restore Successful! Please restart the app.", Colors.green);
+        _showSnack(AppLocalizations.of(context)!.restoreSuccess, Colors.green);
         // Optional: Force navigation back home to reload data
         Navigator.of(context).popUntil((route) => route.isFirst);
       }
     } catch (e) {
-      if (mounted) _showSnack("Restore failed: $e", Colors.red);
+      if (mounted) _showSnack(AppLocalizations.of(context)!.restoreFailed(e.toString()), Colors.red);
     } finally {
       if (mounted) setState(() => _isProcessing = false);
     }
@@ -106,7 +176,7 @@ class _BackupScreenState extends State<BackupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Backup & Restore")),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.backupRestoreTitle)),
       body: Center(
         child: _isProcessing
             ? const CircularProgressIndicator()
@@ -121,7 +191,7 @@ class _BackupScreenState extends State<BackupScreen> {
                     width: 250,
                     child: ElevatedButton.icon(
                       icon: const Icon(Icons.upload),
-                      label: const Text("Backup Data"),
+                      label: Text(AppLocalizations.of(context)!.backupDataButton),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.all(16),
                         backgroundColor: Colors.blue,
@@ -131,9 +201,9 @@ class _BackupScreenState extends State<BackupScreen> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const Text(
-                    "Save your data to Google Drive or WhatsApp",
-                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  Text(
+                    AppLocalizations.of(context)!.backupDataSubtitle,
+                    style: const TextStyle(color: Colors.grey, fontSize: 12),
                   ),
                   
                   const SizedBox(height: 40),
@@ -143,7 +213,7 @@ class _BackupScreenState extends State<BackupScreen> {
                     width: 250,
                     child: OutlinedButton.icon(
                       icon: const Icon(Icons.download),
-                      label: const Text("Restore Data"),
+                      label: Text(AppLocalizations.of(context)!.restoreDataButton),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.all(16),
                         foregroundColor: Colors.redAccent,
@@ -153,9 +223,26 @@ class _BackupScreenState extends State<BackupScreen> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const Text(
-                    "Overwrite current data with a backup file",
-                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  Text(
+                    AppLocalizations.of(context)!.restoreDataSubtitle,
+                    style: const TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+
+                  const SizedBox(height: 40),
+
+                  // CHANGE PIN BUTTON
+                  SizedBox(
+                    width: 250,
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.lock_reset),
+                      label: Text(AppLocalizations.of(context)!.changePinTitle),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.all(16),
+                        foregroundColor: Colors.orange,
+                        side: const BorderSide(color: Colors.orange),
+                      ),
+                      onPressed: _showChangePinDialog,
+                    ),
                   ),
                 ],
               ),

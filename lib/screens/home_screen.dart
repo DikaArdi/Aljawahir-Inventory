@@ -5,6 +5,7 @@ import 'cashier_screen.dart';
 import 'report_screen.dart';
 import 'backup_screen.dart';
 import 'add_edit_product_screen.dart';
+import '../l10n/app_localizations.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -16,9 +17,19 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isOwner ? 'Owner Mode 🔓' : 'Employee Mode 🔒'),
+        title: Text(isOwner ? AppLocalizations.of(context)!.ownerMode : AppLocalizations.of(context)!.employeeMode),
         elevation: 0,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.language),
+            onPressed: () {
+               // Cycle language: EN -> ID -> EN
+               final newLocale = userProvider.locale.languageCode == 'en' 
+                   ? const Locale('id') 
+                   : const Locale('en');
+               userProvider.setLocale(newLocale);
+            },
+          ),
           IconButton(
             icon: Icon(isOwner ? Icons.lock_open : Icons.lock),
             onPressed: () => _showLoginDialog(context, userProvider),
@@ -29,9 +40,9 @@ class HomeScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-             const Text(
-              "Welcome Back!",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+             Text(
+              AppLocalizations.of(context)!.welcomeBack,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
             Expanded(
@@ -42,14 +53,14 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   _buildMenuCard(
                     context,
-                    title: "Cashier (POS)",
+                    title: AppLocalizations.of(context)!.cashierTitle,
                     icon: Icons.point_of_sale,
                     color: Colors.blue,
                     onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const CashierScreen())),
                   ),
                   _buildMenuCard(
                     context,
-                    title: "Reports",
+                    title: AppLocalizations.of(context)!.reportsTitle,
                     icon: Icons.bar_chart,
                     color: Colors.purple,
                     onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ReportScreen())),
@@ -60,7 +71,7 @@ class HomeScreen extends StatelessWidget {
                   if (isOwner) 
                     _buildMenuCard(
                       context,
-                      title: "Add Product",
+                      title: AppLocalizations.of(context)!.addProductTitle,
                       icon: Icons.add_box,
                       color: Colors.orange,
                       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AddEditProductScreen())),
@@ -71,7 +82,7 @@ class HomeScreen extends StatelessWidget {
                   if (isOwner)
                      _buildMenuCard(
                       context,
-                      title: "Settings",
+                      title: AppLocalizations.of(context)!.settingsTitle,
                       icon: Icons.settings,
                       color: Colors.grey,
                       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const BackupScreen())),
@@ -90,7 +101,7 @@ class HomeScreen extends StatelessWidget {
     if (user.isOwner) {
       // If already Owner, just logout (Lock)
       user.logout();
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Switched to Employee Mode")));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.switchedToEmployee)));
       return;
     }
 
@@ -99,27 +110,27 @@ class HomeScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text("Owner Login"),
+        title: Text(AppLocalizations.of(context)!.ownerLoginTitle),
         content: TextField(
           controller: pinController,
           keyboardType: TextInputType.number,
           obscureText: true, // Hide PIN
-          decoration: const InputDecoration(labelText: "Enter PIN"),
+          decoration: InputDecoration(labelText: AppLocalizations.of(context)!.enterPin),
         ),
         actions: [
           TextButton(
-            child: const Text("Cancel"),
+            child: Text(AppLocalizations.of(context)!.cancel),
             onPressed: () => Navigator.pop(ctx),
           ),
           ElevatedButton(
-            child: const Text("Unlock"),
+            child: Text(AppLocalizations.of(context)!.unlock),
             onPressed: () {
               bool success = user.login(pinController.text);
               Navigator.pop(ctx);
               if (success) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Welcome Back, Owner!")));
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.welcomeOwner)));
               } else {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Wrong PIN!"), backgroundColor: Colors.red));
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.wrongPin), backgroundColor: Colors.red));
               }
             },
           )

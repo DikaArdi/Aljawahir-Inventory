@@ -1,0 +1,130 @@
+{
+  "appTitle": "Aljawahir Inventory",
+  "ownerMode": "Owner Mode 🔓",
+  "employeeMode": "Employee Mode 🔒",
+  "welcomeBack": "Welcome Back!",
+  "cashierTitle": "Cashier (POS)",
+  "reportsTitle": "Reports",
+  "addProductTitle": "Add Product",
+  "settingsTitle": "Settings",
+  "ownerLoginTitle": "Owner Login",
+  "enterPin": "Enter PIN",
+  "cancel": "Cancel",
+  "unlock": "Unlock",
+  "switchedToEmployee": "Switched to Employee Mode",
+  "welcomeOwner": "Welcome Back, Owner!",
+  "wrongPin": "Wrong PIN!",
+  
+  "addNewItem": "Add New Item",
+  "editItem": "Edit Item",
+  "deleteProductTitle": "Delete Product?",
+  "deleteProductConfirm": "Are you sure you want to delete '{name}'?",
+  "@deleteProductConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "delete": "Delete",
+  "productNameLabel": "Product Name",
+  "productNameError": "Please enter a name",
+  "barcodeLabel": "Barcode (Optional)",
+  "costPriceLabel": "Buy Price (Cost)",
+  "sellPriceLabel": "Sell Price",
+  "requiredError": "Required",
+  "currentStockLabel": "Current Stock",
+  "retiredProductTitle": "Retired Product",
+  "retiredProductSubtitle": "Hide from cashier but keep history",
+  "saveProductButton": "SAVE PRODUCT",
+  "tapToAddImage": "Tap to add image",
+  "scannedCodeMessage": "Scanned: {code}",
+  "@scannedCodeMessage": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+
+  "stationeryShop": "Stationery Shop",
+  "showRetired": "Show Retired",
+  "hideRetired": "Hide Retired",
+  "searchProduct": "Search Product",
+  "noProductsFound": "No products found",
+  "itemAddedMessage": "{name} Added!",
+  "@itemAddedMessage": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "productNotFound": "Product not found!",
+  "outOfStockMessage": "Out of Stock! Cannot add {name}.",
+  "@outOfStockMessage": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "retiredLabel": "RETIRED",
+  "stockLabel": "Stock: {stock}",
+  "@stockLabel": {
+    "placeholders": {
+      "stock": { "type": "int" }
+    }
+  },
+  "itemsCount": "{count} Items",
+  "@itemsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "transactionSaved": "Transaction Saved!",
+  "payButton": "PAY",
+  "currentCart": "Current Cart",
+  "cannotSellRetired": "Cannot sell retired product.",
+
+  "dailyReportTitle": "Daily Report",
+  "totalSales": "Total Sales",
+  "profit": "Profit",
+  "noSalesDate": "No sales on this date.",
+  "saleAtTime": "Sale at {time}",
+  "@saleAtTime": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "deleteTransactionTitle": "Delete Transaction?",
+  "deleteTransactionConfirm": "This will remove the sale record. If this transaction was made recently, stock will be restored.",
+  "transactionDeleted": "Transaction deleted.",
+
+  "backupRestoreTitle": "Backup & Restore",
+  "noDatabaseFound": "No database found to backup!",
+  "backupFailed": "Backup failed: {error}",
+  "@backupFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "overwriteConfirmTitle": "⚠️ Overwrite Data?",
+  "overwriteConfirmMessage": "This will DELETE your current inventory and replace it with the backup file.\n\nAre you sure?",
+  "restoreButton": "RESTORE",
+  "restoreSuccess": "Restore Successful! Please restart the app.",
+  "restoreFailed": "Restore failed: {error}",
+  "@restoreFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "backupDataButton": "Backup Data",
+  "backupDataSubtitle": "Save your data to Google Drive or WhatsApp",
+  "restoreDataButton": "Restore Data",
+  "restoreDataSubtitle": "Overwrite current data with a backup file",
+  "changePinTitle": "Change PIN",
+  "oldPinLabel": "Old PIN",
+  "newPinLabel": "New PIN",
+  "confirmPinLabel": "Confirm New PIN",
+  "pinChangedSuccess": "PIN Changed Successfully!",
+  "pinMismatchError": "PINs do not match",
+  "wrongOldPinError": "Wrong Old PIN",
+  "changePinButton": "Change PIN"
+}
