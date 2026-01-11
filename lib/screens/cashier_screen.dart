@@ -9,6 +9,8 @@ import '../models/cart_item.dart';
 import 'add_edit_product_screen.dart';
 import 'report_screen.dart';
 
+import 'scanner_screen.dart';
+
 class CashierScreen extends StatefulWidget {
   const CashierScreen({super.key});
 
@@ -141,6 +143,35 @@ class _CashierScreenState extends State<CashierScreen> {
             },
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.qr_code_scanner),
+        onPressed: () async {
+          final String? scannedCode = await Navigator.push(
+            context, 
+            MaterialPageRoute(builder: (context) => const ScannerScreen()),
+          );
+
+          if (scannedCode != null) {
+            // Find product by barcode
+            try {
+              final product = _allProducts.firstWhere((p) => p.barcode == scannedCode);
+              
+              // Add to cart
+              // ignore: use_build_context_synchronously
+              Provider.of<CartProvider>(context, listen: false).addToCart(product);
+              // ignore: use_build_context_synchronously
+              ScaffoldMessenger.of(context).showSnackBar(
+                 SnackBar(content: Text("${product.name} Added!"))
+              );
+            } catch (e) {
+              // ignore: use_build_context_synchronously
+              ScaffoldMessenger.of(context).showSnackBar(
+                 const SnackBar(content: Text("Product not found!"), backgroundColor: Colors.red)
+              );
+            }
+          }
+        },
       ),
       body: Column(
         children: [

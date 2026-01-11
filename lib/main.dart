@@ -1,20 +1,21 @@
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/cart_provider.dart';
-import 'screens/home_screen.dart'; // We haven't built this yet
+import 'providers/user_provider.dart';
+import 'screens/home_screen.dart';
 
 void main() {
   runApp(
-    // Inject the provider into the widget tree
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => UserProvider()), // Add this
       ],
       child: const MyApp(),
     ),
   );
 }
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 

@@ -5,6 +5,9 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import '../models/product.dart';
 import '../services/database_helper.dart';
+import 'package:provider/provider.dart';
+import '../providers/user_provider.dart';
+import 'scanner_screen.dart'; // Ensuring this is imported if used
 
 class AddEditProductScreen extends StatefulWidget {
   // If this is null, we are adding a new product.
@@ -143,11 +146,15 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 1. Get Role
+    final isOwner = Provider.of<UserProvider>(context).isOwner;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.product == null ? 'Add New Item' : 'Edit Item'),
         actions: [
-          if (widget.product != null)
+          // 2. Hide Delete Button for Employees
+          if (widget.product != null && isOwner)
             IconButton(
               icon: const Icon(Icons.delete, color: Colors.red),
               onPressed: _deleteProduct,
@@ -161,37 +168,47 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
           child: ListView(
             children: [
               // --- Image Picker ---
-              GestureDetector(
-                onTap: _pickImage,
-                child: Container(
-                  height: 150,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(10),
+              // Wrap GestureDetector in AbsorbPointer if !isOwner
+              AbsorbPointer(
+                absorbing: !isOwner,
+                child: GestureDetector(
+                  onTap: _pickImage,
+                  child: Container(
+                    height: 150,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: _selectedImage != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Image.file(_selectedImage!, fit: BoxFit.cover),
+                          )
+                        : Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(Icons.add_a_photo, size: 40, color: Colors.grey),
+                              SizedBox(height: 5),
+                              Text("Tap to add image", style: TextStyle(color: Colors.grey)),
+                            ],
+                          ),
                   ),
-                  child: _selectedImage != null
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.file(_selectedImage!, fit: BoxFit.cover),
-                        )
-                      : Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
-                            Icon(Icons.add_a_photo, size: 40, color: Colors.grey),
-                            SizedBox(height: 5),
-                            Text("Tap to add image", style: TextStyle(color: Colors.grey)),
-                          ],
-                        ),
                 ),
               ),
               const SizedBox(height: 20),
               
-              // --- Name ---
+              // --- Name (Read Only for Employee) ---
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Product Name', border: OutlineInputBorder()),
+                readOnly: !isOwner, // <--- LOCK
+                decoration: InputDecoration(
+                  labelText: 'Product Name', 
+                  border: const OutlineInputBorder(),
+                  fillColor: !isOwner ? Colors.grey[200] : null, // Visual cue
+                  filled: !isOwner,
+                ),
                 validator: (value) => value!.isEmpty ? 'Please enter a name' : null,
                 textInputAction: TextInputAction.next,
               ),
@@ -203,32 +220,62 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                   Expanded(
                     child: TextFormField(
                       controller: _barcodeController,
-                      decoration: const InputDecoration(labelText: 'Barcode (Optional)', border: OutlineInputBorder()),
+                      // Barcode editing might also be restricted? User didn't specify, but I'll assume they want to lock "Product Details".
+                      // I will lock it for consistency with Name.
+                      readOnly: !isOwner,
+                      decoration: InputDecoration(
+                        labelText: 'Barcode (Optional)', 
+                        border: const OutlineInputBorder(),
+                        fillColor: !isOwner ? Colors.grey[200] : null,
+                        filled: !isOwner,
+                      ),
                       keyboardType: TextInputType.number,
                     ),
                   ),
                   const SizedBox(width: 10),
+                  // Hide scanner button if not owner? Or allow scanning to verify?
+                  // I'll keep it enabled or maybe disable. Usually employees scan at POS. Here it's editing.
+                  // Restricting it seems safer if the field is read-only.
+                  if (isOwner)
                   IconButton(
                     style: IconButton.styleFrom(backgroundColor: Colors.blue[50], iconSize: 30),
                     icon: const Icon(Icons.qr_code_scanner, color: Colors.blue),
-                    onPressed: () {
-                      // TODO: Integrate mobile_scanner here later
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Camera Scanner coming soon!")),
+                    onPressed: () async {
+                      // 1. Navigate to the Scanner Screen
+                      final String? scannedCode = await Navigator.push(
+                        context, 
+                        MaterialPageRoute(builder: (context) => const ScannerScreen()),
                       );
+    
+                      // 2. If a code was returned, update the text field
+                      if (scannedCode != null) {
+                        setState(() {
+                          _barcodeController.text = scannedCode;
+                        });
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Scanned: $scannedCode")),
+                        );
+                      }
                     },
                   ),
                 ],
               ),
               const SizedBox(height: 16),
 
-              // --- Prices (Row) ---
+              // --- Prices (Read Only for Employee) ---
               Row(
                 children: [
                   Expanded(
                     child: TextFormField(
                       controller: _costController,
-                      decoration: const InputDecoration(labelText: 'Buy Price (Cost)', prefixText: 'Rp '),
+                      readOnly: !isOwner, // <--- LOCK
+                      obscureText: !isOwner, // Hide Cost Price from Employee? (Optional - User suggested)
+                      decoration: InputDecoration(
+                        labelText: 'Buy Price (Cost)', 
+                        prefixText: 'Rp ',
+                        fillColor: !isOwner ? Colors.grey[200] : null,
+                        filled: !isOwner,
+                      ),
                       keyboardType: TextInputType.number,
                       validator: (value) => value!.isEmpty ? 'Required' : null,
                     ),
@@ -237,7 +284,13 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                   Expanded(
                     child: TextFormField(
                       controller: _sellController,
-                      decoration: const InputDecoration(labelText: 'Sell Price', prefixText: 'Rp '),
+                      readOnly: !isOwner, // <--- LOCK
+                      decoration: InputDecoration(
+                        labelText: 'Sell Price', 
+                        prefixText: 'Rp ',
+                        fillColor: !isOwner ? Colors.grey[200] : null,
+                        filled: !isOwner,
+                      ),
                       keyboardType: TextInputType.number,
                       validator: (value) => value!.isEmpty ? 'Required' : null,
                     ),
@@ -246,7 +299,8 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
               ),
               const SizedBox(height: 16),
 
-              // --- Stock ---
+              // --- Stock (EDITABLE for Everyone) ---
+              // This stays enabled!
               TextFormField(
                 controller: _stockController,
                 decoration: const InputDecoration(labelText: 'Current Stock', border: OutlineInputBorder()),
@@ -255,17 +309,18 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
               ),
               const SizedBox(height: 16),
 
-              // --- Archived / Retired Switch ---
-              SwitchListTile(
-                title: const Text("Retired Product"),
-                subtitle: const Text("Hide from cashier but keep history"),
-                value: _isArchived, // State variable
-                onChanged: (val) {
-                  setState(() {
-                    _isArchived = val;
-                  });
-                },
-              ),
+              // --- Archived / Retired Switch (Owner Only) ---
+              if (isOwner)
+                SwitchListTile(
+                  title: const Text("Retired Product"),
+                  subtitle: const Text("Hide from cashier but keep history"),
+                  value: _isArchived, // State variable
+                  onChanged: (val) {
+                    setState(() {
+                      _isArchived = val;
+                    });
+                  },
+                ),
               const SizedBox(height: 30),
 
               // --- Save Button ---

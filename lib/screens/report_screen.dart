@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../services/database_helper.dart';
+import 'package:provider/provider.dart';
+import '../providers/user_provider.dart';
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
@@ -67,6 +69,9 @@ class _ReportScreenState extends State<ReportScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 1. Get Role
+    final isOwner = Provider.of<UserProvider>(context).isOwner;
+
     return Scaffold(
       appBar: AppBar(title: const Text("Daily Report")),
       body: Column(
@@ -157,10 +162,12 @@ class _ReportScreenState extends State<ReportScreen> {
                                   NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(txn['total_amount']),
                                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                                 ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete, color: Colors.red),
-                                  onPressed: () => _confirmDelete(txn['id']),
-                                ),
+                                // 2. Wrap Delete Icon in Conditional
+                                if (isOwner)
+                                  IconButton(
+                                    icon: const Icon(Icons.delete, color: Colors.red),
+                                    onPressed: () => _confirmDelete(txn['id']),
+                                  ),
                               ],
                             ),
                           );

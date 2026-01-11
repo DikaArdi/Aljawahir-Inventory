@@ -166,4 +166,18 @@ class DatabaseHelper {
       whereArgs: [id],
     );
   }
+  // 1. Expose the DB path so we know what file to backup
+  Future<String> get dbPath async {
+    final dbPath = await getDatabasesPath();
+    return join(dbPath, 'aljawahir_inventory.db');
+  }
+
+  // 2. Close the DB (Required before restoring)
+  Future<void> close() async {
+    final db = _database;
+    if (db != null) {
+      await db.close();
+      _database = null; // Reset singleton so it re-opens next time
+    }
+  }
 }
